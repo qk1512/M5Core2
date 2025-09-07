@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>M5Stack Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background: #f0f0f0;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 50px auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h2 {
+            margin: 10px 0;
+        }
+
+        .value {
+            font-size: 2em;
+            color: #007ACC;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>🌡️ Temperature</h2>
+        <div class="value" id="temp">-- °C</div>
+
+        <h2>💧 Humidity</h2>
+        <div class="value" id="hum">-- %</div>
+    </div>
+
+    <script>
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            document.getElementById("temp").textContent = data.temperature + " °C";
+            document.getElementById("hum").textContent = data.humidity + " %";
+        };
+    </script>
+</body>
+
+</html>
