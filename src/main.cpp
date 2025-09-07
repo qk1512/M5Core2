@@ -30,12 +30,27 @@ void notifyClients(float temp, float hum)
 float tempOffset = 0.0;
 float humOffset = 0.0;
 
-void updateLCD(float tempOffset, float humOffset)
+void updateLCD(float tempOffset, float humOffset, float temp, float hum)
 {
   M5.Lcd.fillRect(0, 26, 240, 96, BLACK); // clear old values
   M5.Lcd.setCursor(0, 30);
+  M5.Lcd.printf("Temp: %.2f C\n", temp);
+  M5.Lcd.printf("Hum : %.2f %%\n", hum);
   M5.Lcd.printf("Temp cal : (%.2f)\n", tempOffset);
   M5.Lcd.printf("Hum  cal : (%.2f)\n", humOffset);
+}
+
+float rateTemp = 0.0;
+float rateHum = 0.0;
+
+void calibrationValue(float &rateTemp, float &rateHum)
+{
+  dht20.read();
+  float temp = dht20.getTemperature();
+  float hum = dht20.getHumidity();
+
+  rateTemp = tempOffset / temp;
+  rateHum = humOffset / hum;
 }
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
@@ -54,7 +69,9 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         tempOffset = doc["tempOffset"] | 0.0;
         humOffset = doc["humOffset"] | 0.0;
         Serial.printf("Calibration updated: tempOffset=%.2f, humOffset=%.2f\n", tempOffset, humOffset);
-        //updateLCD(tempOffset, humOffset);
+        calibrationValue(rateTemp, rateHum);
+        Serial.printf("Calibration rate: rateTemp=%.4f, rateHum=%.4f\n", rateTemp, rateHum);
+        // updateLCD(tempOffset, humOffset);
       }
     }
   }
@@ -85,12 +102,13 @@ void setupWebServer()
   server.begin();
 }
 
+
+
 void setup()
 {
-  M5.begin(true, false,true,true,kMBusModeOutput,false);
+  M5.begin(true, false, true, true, kMBusModeOutput, false);
   Serial.begin(115200);
   Wire.begin(SDA_PIN, SCL_PIN);
-
 
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextSize(2);
@@ -99,12 +117,10 @@ void setup()
   SPIFFS.begin(true);
   setupWiFi();
 
-  //dht20.begin(Wire); // Default SDA/SCL
+  // dht20.begin(Wire); // Default SDA/SCL
 
   setupWebServer();
 }
-
-
 
 void loop()
 {
@@ -116,8 +132,14 @@ void loop()
 
     float temp = dht20.getTemperature();
     float hum = dht20.getHumidity();
+    if(rateTemp != 0 && rateHum != 0)
+    {
+      float temp = dht20.getTemperature() * rateTemp;
+      float hum = dht20.getHumidity() * rateHum;
+    }
+    
 
-    updateLCD(tempOffset, humOffset);
+    updateLCD(tempOffset, humOffset,temp,hum);
     notifyClients(temp, hum);
   }
 }
