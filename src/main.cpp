@@ -11,6 +11,11 @@
 
 #include <./websocket/web.h>
 #include <./display/display.h>
+#include <./sensor/CO.h>
+#include <./sensor/NO2.h>
+#include <./sensor/O3.h>
+#include <./sensor/SO2.h>
+#include <./sensor/PM.h>
 
 const char *ssid = "QUANG KHANH_2.4G";
 const char *password = "15122002";
@@ -18,7 +23,7 @@ const char *password = "15122002";
 RS485Class RS485(Serial2, 32, 33, -1, -1);
 
 
-void setupWiFi()
+/* void setupWiFi()
 {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -28,9 +33,9 @@ void setupWiFi()
     Serial.print(".");
   }
   Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
-}
+} */
 
-/* void setupWiFi()
+void setupWiFi()
 {
   const char *ssid = "M5Core2-AP";   // AP name (your choice)
   const char *password = ""; // Password (min 8 chars)
@@ -41,7 +46,7 @@ void setupWiFi()
   IPAddress IP = WiFi.softAPIP(); // Get AP IP
   Serial.print("Access Point started! IP: ");
   Serial.println(IP); // Usually 192.168.4.1
-} */
+}
 
 void setup()
 {
@@ -58,6 +63,7 @@ void setup()
 
   loadOffset(SO2_Offset, O3_Offset, NO2_Offset, CO_Offset, PM2_Offset, PM10_Offset);
   setupWebServer();
+  drawSensorBoxes();
 
 }
 
@@ -69,13 +75,19 @@ void loop()
     lastSend = millis();
 
     float so2 = random(0, 20);
+    updateBoxValue(0, so2);  // SO2
     float o3 = random(0, 20);
+    updateBoxValue(1, o3);   // O3
     float no2 = random(0, 20);
+    updateBoxValue(2, no2);  // NO2
     float co = random(0, 20);  
-    float pm2 = random(0, 20);
+    updateBoxValue(3, co);   // CO
+    float pm25 = random(0, 20);
+    updateBoxValue(4, pm25); // PM2.5
     float pm10 = random(0, 20);
+    updateBoxValue(5, pm10); // PM1
 
-    updateLCD(SO2_Offset, O3_Offset, NO2_Offset, CO_Offset, PM2_Offset, PM10_Offset, so2, o3, no2, co, pm2, pm10);
-    notifyClients(so2, o3, no2, co, pm2, pm10);
+    //updateLCD(SO2_Offset, O3_Offset, NO2_Offset, CO_Offset, PM2_Offset, PM10_Offset, so2, o3, no2, co, pm2, pm10);
+    notifyClients(so2, o3, no2, co, pm25, pm10);
   }
 }

@@ -10,8 +10,7 @@ bool COisConnected(ModbusRTUClientClass &modbus)
 
 void COPrintData(void)
 {
-    if (CO.data_updated == false)
-        return;
+    if (CO.data_updated == false) return;
     printf("CO: %.2f \n", CO.co_value);
 }
 
