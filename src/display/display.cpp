@@ -1,23 +1,10 @@
 #include "display.h"
-void updateLCD(float so2Offset, float o3Offset, float no2Offset, float coOffset, float pm2Offset, float pm10Offset, float so2, float o3, float no2, float co, float pm2, float pm10)
-{
-    M5.Lcd.fillRect(0, 0, 320, 240, BLACK);
-    M5.Lcd.setCursor(0, 0);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.printf("SO2: %.2f (Offset: %.2f)\n", so2 + so2Offset, so2Offset);
-    M5.Lcd.printf("O3: %.2f (Offset: %.2f)\n", o3 + o3Offset, o3Offset);
-    M5.Lcd.printf("NO2: %.2f (Offset: %.2f)\n", no2 + no2Offset, no2Offset);
-    M5.Lcd.printf("CO: %.2f (Offset: %.2f)\n", co + coOffset, coOffset);
-    M5.Lcd.printf("PM2.5: %.2f (Offset: %.2f)\n", pm2 + pm2Offset, pm2Offset);
-    M5.Lcd.printf("PM10: %.2f (Offset: %.2f)\n", pm10 + pm10Offset, pm10Offset);
-}
 
 void drawSensorBoxes()
 {
-    M5.Lcd.fillScreen(WHITE);
+    M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.setTextColor(WHITE);
 
     int boxWidth = 150;
     int boxHeight = 70;
@@ -38,7 +25,7 @@ void drawSensorBoxes()
     }
 }
 
-void updateBoxValue(int index, float value)
+/* void updateBoxValue(int index, float value)
 {
     int boxWidth = 150;
     int boxHeight = 70;
@@ -56,4 +43,39 @@ void updateBoxValue(int index, float value)
     M5.Lcd.setCursor(x + 5, y + 25);
     M5.Lcd.setTextColor(GREEN, BLACK);
     M5.Lcd.printf("%.2f", value);
+}
+ */
+
+void updateBoxValue(int index, const char *label, float value, float offset)
+{
+    int boxWidth = 150;
+    int boxHeight = 70;
+    int padding = 10;
+
+    int row = index / 2;
+    int col = index % 2;
+    int x = col * (boxWidth + padding) + padding;
+    int y = row * (boxHeight + padding) + padding;
+
+    // Draw box background
+    M5.Lcd.fillRect(x, y, boxWidth, boxHeight, DARKGREY);
+    M5.Lcd.drawRect(x, y, boxWidth, boxHeight, WHITE);
+
+    // Sensor label (white)
+    M5.Lcd.setCursor(x + 5, y + 5);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(WHITE, DARKGREY);
+    M5.Lcd.printf("%s: ", label);
+
+    // Sensor value (green, aligned right after label)
+    int labelWidth = strlen(label) * 12; // estimate text width (12px per char)
+    M5.Lcd.setCursor(x + 5 + labelWidth + 10, y + 5);
+    M5.Lcd.setTextColor(GREEN, DARKGREY);
+    M5.Lcd.printf("%.2f", value);
+
+    // Offset value on a new line
+    M5.Lcd.setCursor(x + 5, y + 40);
+    M5.Lcd.setTextColor(YELLOW, DARKGREY);
+    M5.Lcd.setTextSize(1.5);
+    M5.Lcd.printf("Offset: %.2f", offset);
 }
