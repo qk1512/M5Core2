@@ -5,22 +5,28 @@
 #include <ESPAsyncWebServer.h>
 #include <DHT20.h>
 #include <ArduinoJson.h>
+#include "Preferences.h"
 
-const char *ssid = "RD-SEAI_2.4G";
-const char *password = "";
+const char *ssid = "QUANG KHANH_2.4G";
+const char *password = "15122002";
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 DHT20 dht20;
 
+Preferences prefs;
+
 #define SDA_PIN 32
 #define SCL_PIN 33
 
-void notifyClients(float temp, float hum)
-{
+void notifyClients(float temp, float hum, float so2, float co, float no2, float o3)
   StaticJsonDocument<128> doc;
   doc["temperature"] = temp;
   doc["humidity"] = hum;
+  doc["so2"] = so2;
+  doc["co"] = co;
+  doc["no2"] = no2;  
+  doc["o3"] = o3;
 
   String jsonStr;
   serializeJson(doc, jsonStr);
@@ -29,6 +35,7 @@ void notifyClients(float temp, float hum)
 
 float tempOffset = 0.0;
 float humOffset = 0.0;
+
 
 void updateLCD(float tempOffset, float humOffset, float temp, float hum)
 {
@@ -66,12 +73,25 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
       DeserializationError err = deserializeJson(doc, (char *)data);
       if (!err && doc["type"] == "calibrate")
       {
-        tempOffset = doc["tempOffset"] | 0.0;
-        humOffset = doc["humOffset"] | 0.0;
-        Serial.printf("Calibration updated: tempOffset=%.2f, humOffset=%.2f\n", tempOffset, humOffset);
-        calibrationValue(rateTemp, rateHum);
-        Serial.printf("Calibration rate: rateTemp=%.4f, rateHum=%.4f\n", rateTemp, rateHum);
-        // updateLCD(tempOffset, humOffset);
+        JsonObject offsets = doc["offsets"];
+
+        prefs.begin("calibration", false);
+
+        if(offsets.containsKey("value1"))
+        {
+          tempOffset = offsets["value1"];
+          prefs.putFloat("tempOffset", tempOffset);
+          Serial.printf("Received tempOffset: %.2f\n", tempOffset);
+        }
+        if(offsets.containsKey("value2"))
+        {
+          humOffset = offsets["value2"];
+          prefs.putFloat("humOffset", humOffset);
+          Serial.printf("Received humOffset: %.2f\n", humOffset);
+        }
+        prefs.end();
+        //calibrationValue(rateTemp, rateHum);
+        //Serial.printf("Calibration rate: rateTemp=%.4f, rateHum=%.4f\n", rateTemp, rateHum);
       }
     }
   }
@@ -118,8 +138,12 @@ void setup()
   setupWiFi();
 
   // dht20.begin(Wire); // Default SDA/SCL
-
+  prefs.begin("calibration", true);
+  tempOffset = prefs.getFloat("tempOffset", 0.0); 
+  humOffset = prefs.getFloat("humOffset", 0.0);
+  prefs.end();
   setupWebServer();
+
 }
 
 void loop()
@@ -132,14 +156,19 @@ void loop()
 
     float temp = dht20.getTemperature();
     float hum = dht20.getHumidity();
-    if(rateTemp != 0 && rateHum != 0)
-    {
-      float temp = dht20.getTemperature() * rateTemp;
-      float hum = dht20.getHumidity() * rateHum;
-    }
+    float so2 = random(0, 20);
+    float co = random(0, 20);  
+    float no2 = random(0, 20);
+    float o3 = random(0, 20);
     
+    if(rateTemp != 0.0 && rateHum != 0.0)
+    {
+      //Serial.printf("Temperature: %.2f C, Humidity: %.2f %%\n", temp, hum);
+      temp = dht20.getTemperature() * rateTemp;
+      hum = dht20.getHumidity() * rateHum;
+    }
 
     updateLCD(tempOffset, humOffset,temp,hum);
-    notifyClients(temp, hum);
+    notifyClients(temp, hum, 0.0, 0.0, 0.0, 0.0);
   }
 }

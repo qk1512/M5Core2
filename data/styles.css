@@ -1,0 +1,35 @@
+.sensor-block {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.sensor-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.sensor-label {
+    width: 120px;
+    font-size: 1.1em;
+    color: #000;
+}
+
+.sensor-value {
+    font-size: 1.5em;
+    color: #007ACC;
+    text-align: right;
+}
+
+.card-calibration {
+    background: white;
+    padding: 20px;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 320px;
+}
