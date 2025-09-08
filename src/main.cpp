@@ -30,6 +30,19 @@ void setupWiFi()
   Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
 }
 
+/* void setupWiFi()
+{
+  const char *ssid = "M5Core2-AP";   // AP name (your choice)
+  const char *password = ""; // Password (min 8 chars)
+
+  WiFi.mode(WIFI_AP);          // Set mode to Access Point
+  WiFi.softAP(ssid, password); // Start AP
+
+  IPAddress IP = WiFi.softAPIP(); // Get AP IP
+  Serial.print("Access Point started! IP: ");
+  Serial.println(IP); // Usually 192.168.4.1
+} */
+
 void setup()
 {
   M5.begin();
