@@ -15,4 +15,6 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 void loadOffset(float &SO2_Offset, float &O3_Offset, float &NO2_Offset, float &CO_Offset, float &PM2_Offset, float &PM10_Offset);
 void loadCalibrationRates();
 void printCalibrationRates();
+//void initDefaultCalibrationRates();
+void initDefaultOffsets();
 #endif

@@ -6,19 +6,19 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 Preferences prefs;
 
-float O3_Offset = 0.0;
-float CO_Offset = 0.0;
-float NO2_Offset = 0.0;
-float SO2_Offset = 0.0;
-float PM2_Offset = 0.0;
-float PM10_Offset = 0.0;
+float O3_Offset = -1.0;
+float CO_Offset = -1.0;
+float NO2_Offset = -1.0;
+float SO2_Offset = -1.0;
+float PM2_Offset = -1.0;
+float PM10_Offset = -1.0;
 
-float SO2_rate = 0.0;
-float O3_rate = 0.0;
-float NO2_rate = 0.0;
-float CO_rate = 0.0;
-float PM2_rate = 0.0;
-float PM10_rate = 0.0;
+float SO2_rate = 1.0;
+float O3_rate = 1.0;
+float NO2_rate = 1.0;
+float CO_rate = 1.0;
+float PM2_rate = 1.0;
+float PM10_rate = 1.0;
 
 void notifyClients(float so2, float o3, float no2, float co, float pm2, float pm10)
 {
@@ -51,12 +51,16 @@ void setupWebServer()
     server.begin();
 }
 
-void calculateCalibrationOffsets()
+/* void calculateCalibrationOffsets()
 {   
     prefs.begin("rate",false);
-    if(SensorData.so2 != 0)
+    if(SensorData.so2 != 0 )
     {
         SO2_rate = SO2_Offset / SensorData.so2;
+    }
+    else if(SO2_Offset < 0)
+    {
+        SO2_rate = 1;
     }
     else
     {
@@ -68,6 +72,10 @@ void calculateCalibrationOffsets()
     {
         O3_rate = O3_Offset / SensorData.o3;
     }
+    else if (O3_Offset < 0)
+    {
+        O3_Offset = 1;
+    }
     else
     {
         O3_rate = 0.0;
@@ -77,6 +85,10 @@ void calculateCalibrationOffsets()
     if(SensorData.no2 != 0)
     {
         NO2_rate = NO2_Offset / SensorData.no2;
+    }
+    else if(NO2_Offset < 0)
+    {
+        NO2_rate = 1.0;
     }
     else
     {
@@ -88,6 +100,10 @@ void calculateCalibrationOffsets()
     {
         CO_rate = CO_Offset / SensorData.co;
     }
+    else if (CO_Offset < 0)
+    {
+        CO_rate = 1;
+    }
     else
     {
         CO_rate = 0.0;
@@ -98,6 +114,10 @@ void calculateCalibrationOffsets()
     {
         PM2_rate = PM2_Offset / SensorData.pm25;
     }
+    else if (PM2_Offset < 0)
+    {
+        PM2_rate = 1;
+    }
     else
     {
         PM2_rate = 0.0;
@@ -107,6 +127,10 @@ void calculateCalibrationOffsets()
     if(SensorData.pm10 != 0)
     {
         PM10_rate = PM10_Offset / SensorData.pm10;
+    }
+    else if (PM10_Offset < 0)
+    {
+        PM10_rate = 1;
     }
     else
     {
@@ -127,17 +151,17 @@ void printCalibrationRates()
     Serial.printf("CO Rate: %.4f \n", CO_rate);
     Serial.printf("PM2.5 Rate: %.4f \n", PM2_rate);
     Serial.printf("PM10 Rate: %.4f \n", PM10_rate);
-}
+} */
 
 void loadCalibrationRates()
 {
     prefs.begin("rate", true);
-    SO2_rate = prefs.getFloat("SO2Rate", 0.0);
-    O3_rate = prefs.getFloat("O3Rate", 0.0);
-    NO2_rate = prefs.getFloat("NO2Rate", 0.0);   
-    CO_rate = prefs.getFloat("CORate", 0.0);
-    PM2_rate = prefs.getFloat("PM2Rate", 0.0);
-    PM10_rate = prefs.getFloat("PM10Rate", 0.0);
+    SO2_rate = prefs.getFloat("SO2Rate", 1.0);
+    O3_rate = prefs.getFloat("O3Rate", 1.0);
+    NO2_rate = prefs.getFloat("NO2Rate", 1.0);   
+    CO_rate = prefs.getFloat("CORate", 1.0);
+    PM2_rate = prefs.getFloat("PM2Rate", 1.0);
+    PM10_rate = prefs.getFloat("PM10Rate", 1.0);
     prefs.end();
 }
 
@@ -164,9 +188,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     prefs.putFloat("SO2Offset", SO2_Offset);
                     Serial.printf("Received SO2 Offset: %.2f\n", SO2_Offset);
 
-                    if (SensorData.so2 != 0)
+                    if (SensorData.so2 != 0 && SO2_Offset > 0)
                     {
                         SO2_rate = SO2_Offset / SensorData.so2;
+                    }
+                    else if (SO2_Offset < 0)
+                    {
+                        SO2_rate = 1;
                     }
                     else
                     {
@@ -180,9 +208,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     O3_Offset = offsets["value2"];
                     prefs.putFloat("O3Offset", O3_Offset);
                     Serial.printf("Received O3 Offset: %.2f\n", O3_Offset);
-                    if (SensorData.o3 != 0)
+                    if (SensorData.o3 != 0 && O3_Offset > 0)
                     {
                         O3_rate = O3_Offset / SensorData.o3;
+                    }
+                    else if(O3_Offset < 0)
+                    {
+                        O3_rate = 1;
                     }
                     else
                     {
@@ -196,9 +228,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     NO2_Offset = offsets["value3"];
                     prefs.putFloat("NO2Offset", NO2_Offset);
                     Serial.printf("Received NO2 Offset: %.2f\n", NO2_Offset);
-                    if (SensorData.no2 != 0)
+                    if (SensorData.no2 != 0 && NO2_Offset > 0)
                     {
                         NO2_rate = NO2_Offset / SensorData.no2;
+                    }
+                    else if (NO2_Offset < 0)
+                    {
+                        NO2_rate = 1;
                     }
                     else
                     {
@@ -212,9 +248,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     CO_Offset = offsets["value4"];
                     prefs.putFloat("COOffset", CO_Offset);
                     Serial.printf("Received CO Offset: %.2f\n", CO_Offset);
-                    if (SensorData.co != 0)
+                    if (SensorData.co != 0 && CO_Offset >0)
                     {
                         CO_rate = CO_Offset / SensorData.co;
+                    }
+                    else if (CO_Offset < 0)
+                    {
+                        CO_rate = 1;
                     }
                     else
                     {
@@ -228,9 +268,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     PM2_Offset = offsets["value5"];
                     prefs.putFloat("PM2Offset", PM2_Offset);
                     Serial.printf("Received PM2.5 Offset: %.2f\n", PM2_Offset);
-                    if (SensorData.pm25 != 0)
+                    if (SensorData.pm25 != 0 && PM2_Offset > 0)
                     {
                         PM2_rate = PM2_Offset / SensorData.pm25;
+                    }
+                    else if(PM2_Offset < 0)
+                    {
+                        PM2_rate = 1;
                     }
                     else
                     {
@@ -244,9 +288,13 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                     PM10_Offset = offsets["value6"];
                     prefs.putFloat("PM10Offset", PM10_Offset);
                     Serial.printf("Received PM10 Offset: %.2f\n", PM10_Offset);
-                    if (SensorData.pm10 != 0)
+                    if (SensorData.pm10 != 0 && PM10_Offset > 0)
                     {
                         PM10_rate = PM10_Offset / SensorData.pm10;
+                    }
+                    else if(PM10_Offset < 0)
+                    {
+                        PM10_rate = 1;
                     }
                     else
                     {
@@ -272,5 +320,23 @@ void loadOffset(float &SO2_Offset, float &O3_Offset, float &NO2_Offset, float &C
     CO_Offset = prefs.getFloat("COOffset", 0.0);
     PM2_Offset = prefs.getFloat("PM2Offset", 0.0);
     PM10_Offset = prefs.getFloat("PM10Offset", 0.0);
+    prefs.end();
+}
+
+void initDefaultOffsets()
+{
+    prefs.begin("calibration", false);
+    if (!prefs.isKey("SO2Offset"))
+        prefs.putFloat("SO2Offset", 0.0);
+    if (!prefs.isKey("O3Offset"))
+        prefs.putFloat("O3Offset", 0.0);
+    if (!prefs.isKey("NO2Offset"))
+        prefs.putFloat("NO2Offset", 0.0);
+    if (!prefs.isKey("COOffset"))
+        prefs.putFloat("COOffset", 0.0);
+    if (!prefs.isKey("PM2Offset"))
+        prefs.putFloat("PM2Offset", 0.0);
+    if (!prefs.isKey("PM10Offset"))
+        prefs.putFloat("PM10Offset", 0.0);
     prefs.end();
 }

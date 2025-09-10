@@ -37,7 +37,7 @@ void printSensorData(void)
 }
 
 
-/* void readSensorData(ModbusRTUClientClass &modbus)
+void readSensorData(ModbusRTUClientClass &modbus)
 {
     if (xSemaphoreTake(SensorSemaphore, pdMS_TO_TICKS(100)))
     {
@@ -49,31 +49,51 @@ void printSensorData(void)
                 if (modbus.available())
                 {   
                     //SensorData.data_updated = false;
-                    SensorData.so2 = modbus.read();
+                    SensorData.so2 = modbus.read()/100.0;
+                }
+                else
+                {
+                    Serial.println("No data available for SO2");
                 }
                 break;
             case 1:
                 if (modbus.available())
                 {
-                    SensorData.o3 = modbus.read();
+                    SensorData.o3 = modbus.read()/100.0;
+                }
+                else
+                {
+                    Serial.println("No data available for O3");
                 }
                 break;
             case 2:
                 if (modbus.available())
                 {
-                    SensorData.no2 = modbus.read();
+                    SensorData.no2 = modbus.read()/100.0;
+                }
+                else
+                {
+                    Serial.println("No data available for NO2");
                 }
                 break;
             case 3:
                 if (modbus.available())
                 {
-                    SensorData.co = modbus.read();
+                    SensorData.co = modbus.read()/100.0;
+                }  
+                else
+                {
+                    Serial.println("No data available for CO");
                 }
                 break;
             case 4:
                 if (modbus.available())
                 {
                     SensorData.pm25 = modbus.read();
+                }
+                else
+                {
+                    Serial.println("No data available for PM2.5");
                 }
                 break;
             case 5:
@@ -82,6 +102,10 @@ void printSensorData(void)
                     SensorData.pm10 = modbus.read();
                     SensorData.data_updated = true;
                 }
+                else
+                {
+                    Serial.println("No data available for PM10");
+                }
                 break;                
             }
         }
@@ -89,8 +113,8 @@ void printSensorData(void)
         xSemaphoreGive(SensorSemaphore);
     }
 }
- */
-void readSensorData(ModbusRTUClientClass &modbus)
+
+/* void readSensorData(ModbusRTUClientClass &modbus)
 {
     if (xSemaphoreTake(SensorSemaphore, pdMS_TO_TICKS(100)))
     {
@@ -120,4 +144,4 @@ void readSensorData(ModbusRTUClientClass &modbus)
         requestIndex = (requestIndex + 1) % (sizeof(modbusRequest) / sizeof(modbusRequest[0]));
         xSemaphoreGive(SensorSemaphore);
     }
-}
+} */

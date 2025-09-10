@@ -13,8 +13,8 @@
 #include <./display/display.h>
 #include <./sensor/sensor.h>
 
-const char *ssid = "QUANG KHANH_2.4G";
-const char *password = "15122002";
+const char *ssid = "RD-SEAI_2.4G";
+const char *password = "";
 
 RS485Class RS485(Serial2, 32, 33, -1, -1);
 
@@ -36,22 +36,22 @@ void updateDisplay()
     switch (i)
     {
     case 0:
-      updateBoxValue(i,"SO2", SensorData.so2, SO2_Offset);
+      updateBoxValue(i,"SO2", SensorData.so2, SO2_Offset, SO2_rate);
       break;
     case 1:
-      updateBoxValue(i,"O3",SensorData.o3, O3_Offset);
+      updateBoxValue(i,"O3",SensorData.o3, O3_Offset, O3_rate);
       break;
     case 2:
-      updateBoxValue(i,"NO2", SensorData.no2, NO2_Offset);
+      updateBoxValue(i,"NO2", SensorData.no2, NO2_Offset, NO2_rate);
       break;
     case 3:
-      updateBoxValue(i,"CO" ,SensorData.co, CO_Offset);
+      updateBoxValue(i,"CO" ,SensorData.co, CO_Offset, CO_rate);
       break;
     case 4:
-      updateBoxValue(i, "PM2.5" ,SensorData.pm25, PM2_Offset);
+      updateBoxValue(i, "PM2.5" ,SensorData.pm25, PM2_Offset, PM2_rate);
       break;
     case 5:
-      updateBoxValue(i, "PM10",SensorData.pm10, PM10_Offset);
+      updateBoxValue(i, "PM10",SensorData.pm10, PM10_Offset, PM10_rate);
       break;
     }
   }
@@ -84,7 +84,7 @@ void displayTask(void *parameter)
   }
 }
 
-void setupWiFi()
+/* void setupWiFi()
 {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -95,10 +95,10 @@ void setupWiFi()
   }
   Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
 }
-
-/* void setupWiFi()
+ */
+void setupWiFi()
 {
-  const char *ssid = "M5Core2-AP";   // AP name (your choice)
+  const char *ssid = "M5Core2";   // AP name (your choice)
   const char *password = ""; // Password (min 8 chars)
 
   WiFi.mode(WIFI_AP);          // Set mode to Access Point
@@ -107,7 +107,7 @@ void setupWiFi()
   IPAddress IP = WiFi.softAPIP(); // Get AP IP
   Serial.print("Access Point started! IP: ");
   Serial.println(IP); // Usually 192.168.4.1
-} */
+}
 
 
 
@@ -127,11 +127,11 @@ void setup()
   SPIFFS.begin(true);
   setupWiFi();
 
+  //initDefaultOffsets();
   loadOffset(SO2_Offset, O3_Offset, NO2_Offset, CO_Offset, PM2_Offset, PM10_Offset);
   loadCalibrationRates();
 
   setupWebServer();
-  //drawSensorBoxes();
 
   SensorSemaphore = xSemaphoreCreateMutex();
   
