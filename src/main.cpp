@@ -13,6 +13,9 @@
 #include <./display/display.h>
 #include <./sensor/sensor.h>
 
+#include <HTTPClient.h>
+#include <Update.h>
+
 const char *ssid = "RD-SEAI_2.4G";
 const char *password = "";
 
@@ -29,6 +32,13 @@ void readSensorTask(void *parameter)
   }
 }
 
+float so2value = 0.0;
+float o3value = 0.0;
+float no2value = 0.0;
+float covalue = 0.0;
+float pm25value = 0.0;
+float pm10value = 0.0;
+
 void updateDisplay()
 {
   for (int i = 0; i < 6; i++)
@@ -36,22 +46,22 @@ void updateDisplay()
     switch (i)
     {
     case 0:
-      updateBoxValue(i,"SO2", SensorData.so2, SO2_Offset, SO2_rate);
+      so2value = updateBoxValue(i,"SO2", SensorData.so2, SO2_Offset, SO2_rate, so2_fake);
       break;
     case 1:
-      updateBoxValue(i,"O3",SensorData.o3, O3_Offset, O3_rate);
+      o3value = updateBoxValue(i,"O3",SensorData.o3, O3_Offset, O3_rate,o3_fake);
       break;
     case 2:
-      updateBoxValue(i,"NO2", SensorData.no2, NO2_Offset, NO2_rate);
+      no2value = updateBoxValue(i,"NO2", SensorData.no2, NO2_Offset, NO2_rate,no2_fake);
       break;
     case 3:
-      updateBoxValue(i,"CO" ,SensorData.co, CO_Offset, CO_rate);
+      covalue = updateBoxValue(i,"CO" ,SensorData.co, CO_Offset, CO_rate,co_fake);
       break;
     case 4:
-      updateBoxValue(i, "PM2.5" ,SensorData.pm25, PM2_Offset, PM2_rate);
+      pm25value = updateBoxValue(i, "PM2.5" ,SensorData.pm25, PM2_Offset, PM2_rate,pm25_fake);
       break;
     case 5:
-      updateBoxValue(i, "PM10",SensorData.pm10, PM10_Offset, PM10_rate);
+      pm10value = updateBoxValue(i, "PM10",SensorData.pm10, PM10_Offset, PM10_rate,pm10_fake);
       break;
     }
   }
@@ -77,14 +87,15 @@ void displayTask(void *parameter)
       
       //printSensorData();
       updateDisplay();
-      notifyClients(SensorData.so2, SensorData.o3, SensorData.no2, SensorData.co, SensorData.pm25, SensorData.pm10);
+      
+      notifyClients(so2value, o3value, no2value, covalue, pm25value, pm10value);
       SensorData.data_updated = false;
     }
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 
-/* void setupWiFi()
+void setupWiFi()
 {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -95,8 +106,8 @@ void displayTask(void *parameter)
   }
   Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
 }
- */
-void setupWiFi()
+
+/* void setupWiFi()
 {
   const char *ssid = "M5Core2";   // AP name (your choice)
   const char *password = ""; // Password (min 8 chars)
@@ -108,8 +119,7 @@ void setupWiFi()
   Serial.print("Access Point started! IP: ");
   Serial.println(IP); // Usually 192.168.4.1
 }
-
-
+ */
 
 void setup()
 {

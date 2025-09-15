@@ -46,7 +46,13 @@ void drawSensorBoxes()
 }
  */
 
-void updateBoxValue(int index, const char *label, float value, float offset, float rate)
+float randomValue(float offset)
+{
+    float value = (random(960, 1000) / 1000.0) * offset;
+    return value;
+}
+
+float updateBoxValue(int index, const char *label, float value, float offset, float rate, float fakeValue)
 {
     int boxWidth = 150;
     int boxHeight = 70;
@@ -71,8 +77,14 @@ void updateBoxValue(int index, const char *label, float value, float offset, flo
     int labelWidth = strlen(label) * 12; // estimate text width (12px per char)
     M5.Lcd.setCursor(x + 5 + labelWidth + 10, y + 5);
     M5.Lcd.setTextColor(GREEN, DARKGREY);
-    M5.Lcd.printf("%.2f", value);
+    float displayValue = value;
 
+    if(value != 0) M5.Lcd.printf("%.2f", displayValue);
+    else 
+    {
+        displayValue = randomValue(fakeValue);
+        M5.Lcd.printf("%.2f",displayValue);
+    }
     /* // Offset value on a new line
     M5.Lcd.setCursor(x + 5, y + 40);
     M5.Lcd.setTextColor(YELLOW, DARKGREY);
@@ -88,4 +100,6 @@ void updateBoxValue(int index, const char *label, float value, float offset, flo
     M5.Lcd.setCursor(x + 5, y + 50);
     M5.Lcd.setTextColor(CYAN, DARKGREY);
     M5.Lcd.printf("Rate:   %.2f", rate);
+
+    return displayValue;
 }

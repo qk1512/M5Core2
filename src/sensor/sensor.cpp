@@ -37,6 +37,7 @@ void printSensorData(void)
 }
 
 
+
 void readSensorData(ModbusRTUClientClass &modbus)
 {
     if (xSemaphoreTake(SensorSemaphore, pdMS_TO_TICKS(100)))
@@ -50,6 +51,7 @@ void readSensorData(ModbusRTUClientClass &modbus)
                 {   
                     //SensorData.data_updated = false;
                     SensorData.so2 = modbus.read()/100.0;
+                    //randomValue(SensorData.so2, SO2_Offset);
                 }
                 else
                 {

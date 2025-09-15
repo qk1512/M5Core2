@@ -23,12 +23,12 @@ struct SensorDatat {
     bool valid = false;
 };
 
+
 extern SensorDatat SensorData;
 extern SemaphoreHandle_t SensorSemaphore;
 
 bool sensorsAreConnected();
 void readSensorData(ModbusRTUClientClass &modbus);
 void printSensorData(void);
-
 
 #endif

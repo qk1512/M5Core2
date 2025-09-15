@@ -17,4 +17,5 @@ void loadCalibrationRates();
 void printCalibrationRates();
 //void initDefaultCalibrationRates();
 void initDefaultOffsets();
+void chooseValue(float &value, float offset, float &rate, float &fakeValue);
 #endif

@@ -14,4 +14,12 @@ extern float NO2_rate;
 extern float CO_rate;
 extern float PM2_rate;
 extern float PM10_rate;
+
+extern float so2_fake;
+extern float o3_fake;
+extern float no2_fake;
+extern float co_fake;
+extern float pm25_fake;
+extern float pm10_fake;
+
 #endif
